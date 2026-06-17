@@ -69,6 +69,20 @@ export default function ProductionPage() {
 
   const toggleDone = async (itemId: string, currentStatus: string) => {
     const next = currentStatus === 'done' ? 'pending' : 'done'
+    setError('')
+
+    // Optimistic update — immediately reflect the change in UI
+    setData((prev) =>
+      prev.map((dateGroup) => ({
+        ...dateGroup,
+        products: dateGroup.products.map((product) => ({
+          ...product,
+          items: product.items.map((item) =>
+            item.id === itemId ? { ...item, production_status: next } : item
+          ),
+        })),
+      }))
+    )
     setUpdating((prev) => ({ ...prev, [itemId]: true }))
 
     try {
@@ -79,10 +93,9 @@ export default function ProductionPage() {
       })
       const json = await res.json()
       if (json.error) throw new Error(json.error.message)
-
-      // Refresh data
-      await load()
     } catch (e: unknown) {
+      // Revert optimistic update on failure
+      await load()
       setError(e instanceof Error ? e.message : 'Gagal update status')
     } finally {
       setUpdating((prev) => ({ ...prev, [itemId]: false }))
