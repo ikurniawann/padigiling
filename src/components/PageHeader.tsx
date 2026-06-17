@@ -1,0 +1,1 @@
+export function PageHeader({title,subtitle,action}:{title:string;subtitle:string;action?:React.ReactNode}){return <div className="mb-5 flex items-center justify-between gap-4"><div><h2 className="text-[22px] font-extrabold tracking-tight">{title}</h2><p className="mt-1 text-sm text-stone-500">{subtitle}</p></div>{action}</div>}

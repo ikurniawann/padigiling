@@ -1,0 +1,181 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   Padigiling CRM — Liquid Glass UI (macOS-inspired)
+   Palette: Red brand + warm neutrals + frosted glass
+   ============================================================ */
+
+body {
+  background:
+    radial-gradient(ellipse 80% 60% at 15% 5%, rgba(232, 56, 42, 0.12), transparent 50%),
+    radial-gradient(ellipse 60% 80% at 85% 90%, rgba(244, 164, 96, 0.08), transparent 50%),
+    radial-gradient(ellipse 40% 50% at 50% 40%, rgba(255, 200, 150, 0.06), transparent 60%),
+    linear-gradient(175deg, #faf6f2 0%, #f5ede4 30%, #ede3d6 100%);
+  color: #1c1917;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+.glass {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(255,255,255,0.65), rgba(255,255,255,0.28));
+  border: 1px solid rgba(255,255,255,0.55);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.03), inset 0 1px 0 rgba(255,255,255,0.7);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border-radius: 1.25rem;
+  transition: all 0.25s ease;
+}
+
+.glass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 70% 50% at 30% 10%, rgba(255,255,255,0.55), transparent 50%), radial-gradient(ellipse 40% 60% at 80% 90%, rgba(232,56,42,0.04), transparent 50%), linear-gradient(135deg, rgba(255,255,255,0.25), transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.glass > * { position: relative; z-index: 1; }
+
+.glass:hover {
+  box-shadow: 0 8px 32px rgba(0,0,0,0.06), 0 2px 6px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8);
+}
+
+.input {
+  width: 100%;
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 0.75rem;
+  padding: 0.65rem 0.8rem;
+  font-size: 0.875rem;
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #1c1917;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.input:focus {
+  border-color: rgba(232,56,42,0.4);
+  box-shadow: 0 0 0 3px rgba(232,56,42,0.08);
+  background: rgba(255,255,255,0.9);
+}
+
+.input::placeholder { color: #b8a99a; }
+
+select.input {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M6 8L1 3h10z' fill='%2399948c'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  padding-right: 2rem;
+}
+
+textarea.input { resize: vertical; }
+
+.label {
+  display: block;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 700;
+  color: #8c7a6b;
+  margin-bottom: 0.35rem;
+}
+
+.btn {
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 0.75rem;
+  padding: 0.55rem 0.85rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  background: rgba(255,255,255,0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #1c1917;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+}
+
+.btn:hover {
+  background: rgba(255,255,255,0.85);
+  border-color: rgba(0,0,0,0.12);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #e8382a, #d42a1e);
+  border-color: transparent;
+  color: white;
+  box-shadow: 0 2px 12px rgba(232,56,42,0.25), inset 0 1px 0 rgba(255,255,255,0.2);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #f04030, #e02a1e);
+  box-shadow: 0 4px 18px rgba(232,56,42,0.35), inset 0 1px 0 rgba(255,255,255,0.25);
+  transform: translateY(-1px);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  transform: none;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  background: rgba(232,56,42,0.08);
+  color: #c0392b;
+  letter-spacing: 0.01em;
+}
+
+.pill.green { background: rgba(39,174,96,0.1); color: #1e8449; }
+.pill.yellow { background: rgba(243,156,18,0.1); color: #b7791f; }
+.pill.red { background: rgba(231,76,60,0.1); color: #c0392b; }
+
+.glass tbody tr:hover { background: rgba(255,255,255,0.35); }
+
+.bg-brand-soft { background: rgba(232,56,42,0.08) !important; }
+.text-brand { color: #e8382a !important; }
+
+.progress {
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.04);
+  overflow: hidden;
+  margin: 0.35rem 0 0.75rem;
+}
+
+.progress i {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #e8382a, #f06050);
+  transition: width 0.5s ease;
+}
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.18); }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.glass { animation: fadeIn 0.35s ease; }
