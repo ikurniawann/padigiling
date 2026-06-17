@@ -13,6 +13,7 @@ export async function GET(_req: NextRequest) {
     .select(`
       id, order_no, event_date, event_time, status, notes_internal,
       customers(name, phone),
+      deliveries(address, recipient_name),
       order_items(id, product_name, portion, quantity, unit_price, notes, production_status)
     `)
     .in('status', ['payment_verified', 'processing', 'ready'])
@@ -21,6 +22,9 @@ export async function GET(_req: NextRequest) {
 
   if (error) return fail('Gagal mengambil data produksi', 500, error)
   if (!orders?.length) return ok([])
+
+  type CustomerRow = { name?: string; phone?: string }
+  type DeliveryRow = { address?: string | null; recipient_name?: string | null }
 
   // Group by event_date → product_name
   const groups: Record<string, Record<string, {
@@ -31,6 +35,7 @@ export async function GET(_req: NextRequest) {
       order_id: string
       order_no: string
       customer_name: string
+      customer_address: string | null
       portion: number | null
       quantity: number
       notes: string | null
@@ -41,6 +46,10 @@ export async function GET(_req: NextRequest) {
   for (const order of orders) {
     const dateKey = order.event_date || 'no-date'
     if (!groups[dateKey]) groups[dateKey] = {}
+
+    const customer = order.customers as CustomerRow | null
+    const deliveries = order.deliveries as DeliveryRow[] | null
+    const delivery = deliveries?.[0] ?? null
 
     const items = order.order_items || []
     for (const item of items) {
@@ -57,7 +66,8 @@ export async function GET(_req: NextRequest) {
         id: item.id,
         order_id: order.id,
         order_no: order.order_no,
-        customer_name: (order.customers as { name?: string }[])?.[0]?.name || '-',
+        customer_name: customer?.name || '-',
+        customer_address: delivery?.address || null,
         portion: item.portion,
         quantity: item.quantity || 0,
         notes: item.notes,

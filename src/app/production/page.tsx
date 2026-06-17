@@ -9,6 +9,7 @@ type Item = {
   order_id: string
   order_no: string
   customer_name: string
+  customer_address: string | null
   portion: number | null
   quantity: number
   notes: string | null
@@ -234,16 +235,24 @@ export default function ProductionPage() {
                                 disabled={updating[item.id]}
                               />
                               <span className="flex-1 min-w-0">
-                                <span className="font-semibold text-xs text-brand">
-                                  {item.order_no}
+                                <span className="flex items-baseline gap-1.5 flex-wrap">
+                                  <span className="font-semibold text-xs text-brand">
+                                    {item.order_no}
+                                  </span>
+                                  <span className="text-stone-500">—</span>
+                                  <span className={`font-medium ${item.production_status === 'done' ? 'line-through text-stone-400' : 'text-stone-700'}`}>
+                                    {item.customer_name}
+                                  </span>
+                                  <span className="text-stone-400">
+                                    ({item.portion ? `${item.portion} porsi` : `${item.quantity} pcs`})
+                                  </span>
                                 </span>
-                                <span className="text-stone-500 mx-1">—</span>
-                                <span className={`${item.production_status === 'done' ? 'line-through text-stone-400' : 'text-stone-700'}`}>
-                                  {item.customer_name}
-                                </span>
-                                <span className="text-stone-400 ml-1">
-                                  ({item.portion ? `${item.portion} porsi` : `${item.quantity} pcs`})
-                                </span>
+                                {item.customer_address && (
+                                  <span className="mt-0.5 flex items-center gap-1 text-xs text-stone-400">
+                                    <span>📍</span>
+                                    <span className="truncate">{item.customer_address}</span>
+                                  </span>
+                                )}
                               </span>
                               {item.production_status === 'done' && (
                                 <span className="text-xs text-emerald-600 font-semibold shrink-0">
