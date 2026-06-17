@@ -26,38 +26,18 @@ type DateGroup = {
   products: ProductGroup[]
 }
 
-const STATUS_ICON: Record<string, string> = {
-  pending: '⬜',
-  in_progress: '🔄',
-  done: '✅',
-}
-
-const STATUS_NEXT: Record<string, string> = {
-  pending: 'in_progress',
-  in_progress: 'done',
-  done: 'pending',
-}
-
-const STATUS_LABEL: Record<string, string> = {
-  pending: 'Pending',
-  in_progress: 'Progress',
-  done: 'Selesai',
-}
-
-const STATUS_PILL: Record<string, string> = {
-  pending: 'pill',
-  in_progress: 'pill yellow',
-  done: 'pill green',
-}
-
 function fmtDate(d: string) {
-  const date = new Date(d + 'T00:00:00')
-  return date.toLocaleDateString('id-ID', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  })
+  if (!d || d === 'no-date') return 'Tanpa Tanggal'
+  try {
+    const date = new Date(d + 'T00:00:00')
+    if (isNaN(date.getTime())) return 'Tanpa Tanggal'
+    return date.toLocaleDateString('id-ID', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    })
+  } catch { return 'Tanpa Tanggal' }
 }
 
 export default function ProductionPage() {
@@ -87,14 +67,8 @@ export default function ProductionPage() {
     setExpanded((prev) => ({ ...prev, [key]: !prev[key] }))
   }
 
-  const cycleStatus = async (itemId: string) => {
-    const currentItem = data
-      .flatMap((d) => d.products)
-      .flatMap((p) => p.items)
-      .find((i) => i.id === itemId)
-    if (!currentItem) return
-
-    const next = STATUS_NEXT[currentItem.production_status] || 'pending'
+  const toggleDone = async (itemId: string, currentStatus: string) => {
+    const next = currentStatus === 'done' ? 'pending' : 'done'
     setUpdating((prev) => ({ ...prev, [itemId]: true }))
 
     try {
@@ -106,7 +80,7 @@ export default function ProductionPage() {
       const json = await res.json()
       if (json.error) throw new Error(json.error.message)
 
-      // Optimistic-like: refresh all data
+      // Refresh data
       await load()
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Gagal update status')
@@ -115,11 +89,24 @@ export default function ProductionPage() {
     }
   }
 
+  const allExpanded = (group: DateGroup) => {
+    return group.products.every((p) => expanded[`${group.event_date}-${p.product_name}`])
+  }
+
+  const expandAll = (group: DateGroup) => {
+    const newExpanded = { ...expanded }
+    const expand = !allExpanded(group)
+    group.products.forEach((p) => {
+      newExpanded[`${group.event_date}-${p.product_name}`] = expand
+    })
+    setExpanded(newExpanded)
+  }
+
   return (
     <AppShell>
       <PageHeader
         title="Production Board"
-        subtitle="Tracking produksi per item — klik item untuk ganti status."
+        subtitle="Centang item yang sudah selesai diproduksi."
         action={
           <button className="btn" onClick={load}>
             ↻ Refresh
@@ -146,93 +133,121 @@ export default function ProductionPage() {
       )}
 
       <div className="space-y-6">
-        {data.map((dateGroup) => (
-          <div key={dateGroup.event_date} className="glass rounded-3xl p-5">
-            <h3 className="mb-4 text-lg font-extrabold">
-              📅 {fmtDate(dateGroup.event_date)}
-            </h3>
+        {data.map((dateGroup) => {
+          const totalItems = dateGroup.products.reduce((s, p) => s + p.items.length, 0)
+          const doneItems = dateGroup.products.reduce((s, p) => s + p.items.filter(i => i.production_status === 'done').length, 0)
+          const pct = totalItems > 0 ? Math.round((doneItems / totalItems) * 100) : 0
 
-            <div className="space-y-3">
-              {dateGroup.products.map((product) => {
-                const key = `${dateGroup.event_date}-${product.product_name}`
-                const isOpen = expanded[key] ?? false
-
-                // Count stats
-                const done = product.items.filter((i) => i.production_status === 'done').length
-                const progress = product.items.filter((i) => i.production_status === 'in_progress').length
-                const pending = product.items.filter((i) => i.production_status === 'pending').length
-                const pct = product.items.length > 0 ? Math.round((done / product.items.length) * 100) : 0
-
-                return (
-                  <div
-                    key={key}
-                    className="rounded-2xl bg-white/50 border border-white/60 overflow-hidden"
-                  >
-                    {/* Product header — clickable */}
-                    <button
-                      onClick={() => toggleExpand(key)}
-                      className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-white/40 transition-colors"
-                    >
-                      <span className="text-lg">{isOpen ? '▼' : '▶'}</span>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-baseline gap-2">
-                          <span className="font-bold text-base truncate">
-                            {product.product_name}
-                          </span>
-                          <span className="text-sm text-stone-500 shrink-0">
-                            ×{product.total_quantity}
-                          </span>
-                        </div>
-                        <div className="mt-1 flex gap-2 text-xs text-stone-400">
-                          {done > 0 && <span>✅ {done}</span>}
-                          {progress > 0 && <span>🔄 {progress}</span>}
-                          {pending > 0 && <span>⬜ {pending}</span>}
-                        </div>
-                        <div className="progress mt-1">
-                          <i style={{ width: `${pct}%` }} />
-                        </div>
-                      </div>
-                      <span className={`${STATUS_PILL[product.items.every(i => i.production_status === 'done') ? 'done' : product.items.some(i => i.production_status === 'in_progress') ? 'in_progress' : 'pending']} shrink-0`}>
-                        {done}/{product.items.length}
-                      </span>
-                    </button>
-
-                    {/* Expanded: individual items */}
-                    {isOpen && (
-                      <div className="border-t border-white/60 px-4 py-2 space-y-1">
-                        {product.items.map((item) => (
-                          <button
-                            key={item.id}
-                            onClick={() => cycleStatus(item.id)}
-                            disabled={updating[item.id]}
-                            className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm text-left hover:bg-white/40 transition-colors disabled:opacity-50"
-                          >
-                            <span className="text-lg shrink-0">
-                              {updating[item.id] ? '⏳' : STATUS_ICON[item.production_status] || '⬜'}
-                            </span>
-                            <span className="flex-1 min-w-0">
-                              <span className="font-semibold text-xs text-brand">
-                                {item.order_no}
-                              </span>
-                              <span className="text-stone-500 mx-1">—</span>
-                              <span className="text-stone-700">{item.customer_name}</span>
-                              <span className="text-stone-400 ml-1">
-                                ({item.portion ? `${item.portion} porsi` : `${item.quantity} pcs`})
-                              </span>
-                            </span>
-                            <span className={`${STATUS_PILL[item.production_status] || 'pill'} shrink-0`}>
-                              {STATUS_LABEL[item.production_status] || item.production_status}
-                            </span>
-                          </button>
-                        ))}
-                      </div>
-                    )}
+          return (
+            <div key={dateGroup.event_date} className="glass rounded-3xl p-5">
+              <div className="mb-4 flex items-center justify-between">
+                <h3 className="text-lg font-extrabold">
+                  📅 {fmtDate(dateGroup.event_date)}
+                </h3>
+                <div className="flex items-center gap-3">
+                  <span className="text-xs text-stone-400">
+                    {doneItems}/{totalItems} selesai
+                  </span>
+                  <div className="progress w-20">
+                    <i style={{ width: `${pct}%` }} />
                   </div>
-                )
-              })}
+                  <button
+                    onClick={() => expandAll(dateGroup)}
+                    className="text-xs text-brand hover:underline"
+                  >
+                    {allExpanded(dateGroup) ? 'Tutup semua' : 'Buka semua'}
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                {dateGroup.products.map((product) => {
+                  const key = `${dateGroup.event_date}-${product.product_name}`
+                  const isOpen = expanded[key] ?? false
+                  const done = product.items.filter((i) => i.production_status === 'done').length
+                  const pending = product.items.length - done
+                  const productPct = product.items.length > 0 ? Math.round((done / product.items.length) * 100) : 0
+
+                  return (
+                    <div
+                      key={key}
+                      className="rounded-2xl bg-white/50 border border-white/60 overflow-hidden"
+                    >
+                      {/* Product header */}
+                      <button
+                        onClick={() => toggleExpand(key)}
+                        className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-white/40 transition-colors"
+                      >
+                        <span className="text-lg">{isOpen ? '▼' : '▶'}</span>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-baseline gap-2">
+                            <span className={`font-bold text-base truncate ${done === product.items.length ? 'line-through text-stone-400' : ''}`}>
+                              {product.product_name}
+                            </span>
+                            <span className="text-sm text-stone-500 shrink-0">
+                              ×{product.total_quantity}
+                            </span>
+                          </div>
+                          <div className="mt-1 flex gap-2 text-xs text-stone-400">
+                            <span>✅ {done}</span>
+                            {pending > 0 && <span>⬜ {pending}</span>}
+                          </div>
+                          <div className="progress mt-1">
+                            <i style={{ width: `${productPct}%` }} />
+                          </div>
+                        </div>
+                        <span className="pill shrink-0">
+                          {done}/{product.items.length}
+                        </span>
+                      </button>
+
+                      {/* Expanded: checklist items */}
+                      {isOpen && (
+                        <div className="border-t border-white/60 px-4 py-2 space-y-1">
+                          {product.items.map((item) => (
+                            <label
+                              key={item.id}
+                              className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm cursor-pointer transition-colors ${
+                                item.production_status === 'done'
+                                  ? 'bg-green-50 hover:bg-green-100'
+                                  : 'hover:bg-white/60'
+                              } ${updating[item.id] ? 'opacity-50 pointer-events-none' : ''}`}
+                            >
+                              <input
+                                type="checkbox"
+                                className="w-5 h-5 accent-emerald-600 cursor-pointer shrink-0"
+                                checked={item.production_status === 'done'}
+                                onChange={() => toggleDone(item.id, item.production_status)}
+                                disabled={updating[item.id]}
+                              />
+                              <span className="flex-1 min-w-0">
+                                <span className="font-semibold text-xs text-brand">
+                                  {item.order_no}
+                                </span>
+                                <span className="text-stone-500 mx-1">—</span>
+                                <span className={`${item.production_status === 'done' ? 'line-through text-stone-400' : 'text-stone-700'}`}>
+                                  {item.customer_name}
+                                </span>
+                                <span className="text-stone-400 ml-1">
+                                  ({item.portion ? `${item.portion} porsi` : `${item.quantity} pcs`})
+                                </span>
+                              </span>
+                              {item.production_status === 'done' && (
+                                <span className="text-xs text-emerald-600 font-semibold shrink-0">
+                                  ✓ Selesai
+                                </span>
+                              )}
+                            </label>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
             </div>
-          </div>
-        ))}
+          )}
+        )}
       </div>
     </AppShell>
   )

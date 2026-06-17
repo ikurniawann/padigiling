@@ -2,19 +2,39 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
+import {
+  LayoutDashboard,
+  Users2,
+  GitBranch,
+  Building2,
+  ShoppingBag,
+  ChefHat,
+  PlusCircle,
+  Receipt,
+  BarChart2,
+  Database,
+  Settings,
+  LogOut,
+} from 'lucide-react'
 
-const nav = [
-  ['/dashboard', 'Dashboard'],
-  ['/leads', 'Leads'],
-  ['/pipeline', 'Pipeline'],
-  ['/customers', 'Customers'],
-  ['/orders', 'Orders'],
-  ['/production', 'Production'],
-  ['/create-order', 'Create Order'],
-  ['/invoices', 'Invoice'],
-  ['/reports', 'Reports'],
-  ['/master-data', 'Master Data'],
-  ['/settings', 'Settings'],
+type NavItem = {
+  href: string
+  label: string
+  icon: React.ElementType
+}
+
+const nav: NavItem[] = [
+  { href: '/dashboard',    label: 'Dashboard',    icon: LayoutDashboard },
+  { href: '/leads',        label: 'Leads',        icon: Users2 },
+  { href: '/pipeline',     label: 'Pipeline',     icon: GitBranch },
+  { href: '/customers',    label: 'Customers',    icon: Building2 },
+  { href: '/orders',       label: 'Orders',       icon: ShoppingBag },
+  { href: '/create-order', label: 'Create Order', icon: PlusCircle },
+  { href: '/invoices',     label: 'Invoice',      icon: Receipt },
+  { href: '/production',   label: 'Production',   icon: ChefHat },
+  { href: '/reports',      label: 'Reports',      icon: BarChart2 },
+  { href: '/master-data',  label: 'Master Data',  icon: Database },
+  { href: '/settings',     label: 'Settings',     icon: Settings },
 ]
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -27,35 +47,57 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div>
-      <header className="sticky top-0 z-20 flex items-center gap-6 px-7 py-3 backdrop-blur-2xl bg-white/60 border-b border-white/40 shadow-sm">
-        <div className="flex min-w-[220px] items-center gap-3">
-          <div className="flex h-9 w-32 items-center justify-center overflow-hidden rounded-xl bg-brand px-3 shadow-lg shadow-red-200">
+    <div className="flex min-h-screen">
+      {/* Sidebar */}
+      <aside className="fixed inset-y-0 left-0 z-30 flex w-60 flex-col border-r border-white/40 bg-white/60 shadow-[4px_0_24px_rgba(0,0,0,0.04)] backdrop-blur-2xl">
+        {/* Logo */}
+        <div className="flex items-center gap-3 border-b border-white/40 px-5 py-5">
+          <div className="flex h-9 w-[72px] items-center justify-center overflow-hidden rounded-xl bg-brand px-2 shadow-lg shadow-red-200">
             <img src="/padigiling.png" alt="Padigiling" className="h-full w-full object-contain" />
           </div>
           <div>
-            <h1 className="text-sm font-extrabold">Padigiling CRM</h1>
-            <p className="text-[11px] text-stone-500">Lead • Order • Pipeline</p>
+            <p className="text-sm font-extrabold leading-tight">Padigiling</p>
+            <p className="text-[10px] leading-tight text-stone-500">CRM</p>
           </div>
         </div>
-        <nav className="flex flex-1 gap-1 overflow-auto whitespace-nowrap">
-          {nav.map(([href, label]) => (
-            <Link
-              key={href}
-              href={href}
-              className={`rounded-xl px-3 py-2 text-sm font-semibold ${
-                path === href
-                  ? 'bg-brand-soft text-brand'
-                  : 'text-stone-600 hover:bg-brand-soft hover:text-brand'
-              }`}
-            >
-              {label}
-            </Link>
-          ))}
+
+        {/* Nav links */}
+        <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-4">
+          {nav.map(({ href, label, icon: Icon }) => {
+            const active = path === href
+            return (
+              <Link
+                key={href}
+                href={href}
+                className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors ${
+                  active
+                    ? 'bg-brand-soft text-brand'
+                    : 'text-stone-600 hover:bg-brand-soft hover:text-brand'
+                }`}
+              >
+                <Icon size={17} strokeWidth={active ? 2.5 : 2} />
+                {label}
+              </Link>
+            )
+          })}
         </nav>
-        <button onClick={logout} className="btn">Logout</button>
-      </header>
-      <main className="mx-auto max-w-[1440px] p-7">{children}</main>
+
+        {/* Logout */}
+        <div className="border-t border-white/40 px-3 py-4">
+          <button
+            onClick={logout}
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-stone-500 transition-colors hover:bg-red-50 hover:text-red-600"
+          >
+            <LogOut size={17} />
+            Logout
+          </button>
+        </div>
+      </aside>
+
+      {/* Main content — offset by sidebar width */}
+      <main className="ml-60 min-h-screen flex-1 p-7">
+        {children}
+      </main>
     </div>
   )
 }
