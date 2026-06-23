@@ -3,6 +3,7 @@ import { AppShell } from '@/components/AppShell'
 import { PageHeader } from '@/components/PageHeader'
 import { useEffect, useState } from 'react'
 import { ExternalLink } from 'lucide-react'
+import { rp } from '@/lib/format'
 
 type Invoice = {
   id: string; invoice_no: string | null; platform: string
@@ -52,11 +53,11 @@ export default function Invoices() {
       <section className="mb-4 grid gap-4 md:grid-cols-3">
         <div className="glass rounded-3xl p-4">
           <p className="text-xs text-stone-500">Total Invoice</p>
-          <b className="text-xl">Rp{totalAmount.toLocaleString('id-ID')}</b>
+          <b className="text-xl">{rp(totalAmount)}</b>
         </div>
         <div className="glass rounded-3xl p-4">
           <p className="text-xs text-stone-500">Sudah Dibayar</p>
-          <b className="text-xl text-green-700">Rp{paidAmount.toLocaleString('id-ID')}</b>
+          <b className="text-xl text-green-700">{rp(paidAmount)}</b>
         </div>
         <div className="glass rounded-3xl p-4">
           <p className="text-xs text-stone-500">Pending</p>
@@ -96,7 +97,7 @@ export default function Invoices() {
                     </a>
                   </td>
                   <td><span className="pill">{inv.platform}</span></td>
-                  <td>Rp{Number(inv.amount || 0).toLocaleString('id-ID')}</td>
+                  <td>{rp(Number(inv.amount || 0))}</td>
                   <td><span className={statusPill(inv.status)}>{inv.status}</span></td>
                   <td className="text-xs text-stone-500">
                     {inv.sent_at ? new Date(inv.sent_at).toLocaleDateString('id-ID') : '-'}

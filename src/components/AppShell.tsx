@@ -15,6 +15,7 @@ import {
   Database,
   Settings,
   LogOut,
+  Package,
 } from 'lucide-react'
 
 type NavItem = {
@@ -31,6 +32,7 @@ const nav: NavItem[] = [
   { href: '/orders',       label: 'Orders',       icon: ShoppingBag },
   { href: '/create-order', label: 'Create Order', icon: PlusCircle },
   { href: '/invoices',     label: 'Invoice',      icon: Receipt },
+  { href: '/products',     label: 'Produk',       icon: Package },
   { href: '/production',   label: 'Production',   icon: ChefHat },
   { href: '/reports',      label: 'Reports',      icon: BarChart2 },
   { href: '/master-data',  label: 'Master Data',  icon: Database },

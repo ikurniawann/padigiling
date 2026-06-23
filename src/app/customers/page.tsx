@@ -3,6 +3,7 @@ import { AppShell } from '@/components/AppShell'
 import { PageHeader } from '@/components/PageHeader'
 import { useEffect, useState } from 'react'
 import { ChevronRight } from 'lucide-react'
+import { rp } from '@/lib/format'
 
 type Customer = {
   id: string; customer_no: string; name: string; phone: string; email: string
@@ -25,7 +26,6 @@ export default function Customers() {
 
   useEffect(() => { load() }, [])
 
-  const rp = (n: number) => 'Rp' + Number(n || 0).toLocaleString('id-ID')
   const totalCustomers = rows.length
 
   return (

@@ -3,6 +3,7 @@ import { AppShell } from '@/components/AppShell'
 import { PageHeader } from '@/components/PageHeader'
 import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { rp } from '@/lib/format'
 
 type Any = Record<string, any>
 
@@ -35,7 +36,6 @@ export default function CustomerDetail() {
   const orders = customer.orders || []
   const totalSpent = orders.reduce((s: number, o: Any) => s + Number(o.grand_total || 0), 0)
   const completedOrders = orders.filter((o: Any) => o.status === 'completed').length
-  const rp = (n: number) => 'Rp' + Number(n || 0).toLocaleString('id-ID')
 
   return (
     <AppShell>

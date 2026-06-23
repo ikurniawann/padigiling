@@ -6,6 +6,8 @@
 
 export type UserRole = 'owner' | 'admin' | 'sales' | 'kitchen' | 'finance'
 
+export type ProductionStatus = 'pending' | 'persiapan' | 'memasak' | 'done'
+
 export type OrderType = 'delivery' | 'pickup'
 
 export type OrderStatus =
@@ -52,16 +54,45 @@ export interface PipelineStage {
   updated_at: string
 }
 
+export interface ProductCategory {
+  id: string
+  name: string
+  slug: string
+  description: string | null
+  sort_order: number
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface ProductVariant {
+  id: string
+  product_id: string
+  name: string
+  sku: string | null
+  price: number
+  portion: number | null
+  sort_order: number
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
 export interface Product {
   id: string
   sku: string | null
   name: string
   category: string | null
+  category_id: string | null
   base_price: number
   base_portion: number | null
+  is_custom_price: boolean
   is_active: boolean
   created_at: string
   updated_at: string
+  // Relations
+  product_categories?: ProductCategory
+  product_variants?: ProductVariant[]
 }
 
 // --- CRM Tables ---
@@ -289,4 +320,17 @@ export interface ChannelSummary {
   name: string
   count: number
   revenue: number
+}
+
+export interface ReportsAnalytics {
+  period: string
+  summary: {
+    revenue: number
+    order_count: number
+    avg_order_value: number
+    unique_customers: number
+  }
+  revenue_trend: Array<{ label: string; revenue: number; order_count: number }>
+  best_products: Array<{ product_name: string; quantity: number; revenue: number }>
+  best_customers: Array<{ id: string; name: string; phone: string | null; order_count: number; total_spent: number }>
 }

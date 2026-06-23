@@ -42,6 +42,17 @@ export const createOrderSchema = z.object({
   // Internal notes
   notes_internal: z.string().max(2000).optional().default(''),
   item_notes: z.string().max(1000).optional().default(''),
+
+  // Structured order items (dari product browser)
+  order_items: z.array(z.object({
+    product_id: z.string().uuid().nullable().optional(),
+    product_name: z.string().min(1),
+    variant_id: z.string().uuid().nullable().optional(),
+    quantity: z.coerce.number().int().min(1),
+    unit_price: z.coerce.number().min(0),
+    portion: z.coerce.number().int().nullable().optional(),
+    notes: z.string().optional(),
+  })).optional(),
 })
 
 export type CreateOrderInput = z.infer<typeof createOrderSchema>

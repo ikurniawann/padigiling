@@ -2,6 +2,7 @@
 import { AppShell } from '@/components/AppShell'
 import { PageHeader } from '@/components/PageHeader'
 import { useEffect, useState } from 'react'
+import { rp } from '@/lib/format'
 
 type DashboardStats = {
   revenue: number
@@ -28,10 +29,6 @@ type DashboardData = {
   stats: DashboardStats
   latest_orders: Order[]
   channels: Channel[]
-}
-
-function rp(n: number) {
-  return 'Rp' + Number(n || 0).toLocaleString('id-ID')
 }
 
 function Metric({ label, value }: { label: string; value: string | number }) {

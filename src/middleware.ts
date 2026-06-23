@@ -32,14 +32,14 @@ export async function middleware(request: NextRequest) {
   const protectedPaths = [
     '/dashboard', '/orders', '/customers', '/leads',
     '/pipeline', '/invoices', '/reports', '/master-data',
-    '/settings', '/create-order', '/production',
+    '/settings', '/create-order', '/production', '/products',
   ]
 
   // Protected API routes
   const protectedApiPaths = [
     '/api/customers', '/api/orders', '/api/dashboard',
     '/api/invoices', '/api/master-data', '/api/leads',
-    '/api/production',
+    '/api/production', '/api/products', '/api/reports',
   ]
 
   const isProtected =

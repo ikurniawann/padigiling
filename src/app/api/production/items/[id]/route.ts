@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { fail, ok } from '@/lib/api-response'
 
-const VALID_STATUSES = ['pending', 'in_progress', 'done']
+const VALID_STATUSES = ['pending', 'persiapan', 'memasak', 'done']
 
 /**
  * Update production_status on a single order_item.

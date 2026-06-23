@@ -61,6 +61,7 @@ export async function POST(req: NextRequest) {
     p_parser_type: body.parser_type,
     p_notes_internal: body.notes_internal || null,
     p_lead_id: leadId,
+    p_items: body.order_items?.length ? body.order_items : null,
   })
 
   if (error) return fail(error.message, 500, error)
